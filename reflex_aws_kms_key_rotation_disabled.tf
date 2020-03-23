@@ -1,10 +1,26 @@
 module "reflex_aws_kms_key_rotation_disabled" {
   source           = "git::https://github.com/cloudmitigator/reflex-engine.git//modules/cwe_lambda?ref=v0.5.4"
   rule_name        = "KMSKeyRotationDisabled"
-  rule_description = "TODO: Provide rule description"
+  rule_description = "A Reflex Rule for enforcing KMS Key rotation"
 
   event_pattern = <<PATTERN
-# TODO: Provide event pattern
+{
+  "source": [
+    "aws.kms"
+  ],
+  "detail-type": [
+    "AWS API Call via CloudTrail"
+  ],
+  "detail": {
+    "eventSource": [
+      "kms.amazonaws.com"
+    ],
+    "eventName": [
+      "CreateKey",
+      "DisableKeyRotation"
+    ]
+  }
+}
 PATTERN
 
   function_name   = "KMSKeyRotationDisabled"
@@ -16,10 +32,20 @@ PATTERN
     MODE      = var.mode
   }
   custom_lambda_policy = <<EOF
-# TODO: Provide required lambda permissions policy
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "kms:EnableKeyRotation",
+        "kms:GetKeyRotationStatus"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
 EOF
-
-
 
   queue_name    = "KMSKeyRotationDisabled"
   delay_seconds = 0

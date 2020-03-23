@@ -1,5 +1,5 @@
 # reflex-aws-kms-key-rotation-disabled
-TODO: Write a brief description of your rule and what it does.
+A Reflex Rule for enforcing KMS Key rotation
 
 ## Usage
 To use this rule either add it to your `reflex.yaml` configuration file:  

@@ -8,21 +8,19 @@ from reflex_core import AWSRule
 
 
 class KMSKeyRotationDisabled(AWSRule):
-    """ TODO: A description for your rule """
+    """ A Reflex Rule for enforcing KMS Key rotation """
 
-    # TODO: Instantiate whatever boto3 client you'll need, if any.
-    # Example:
-    # client = boto3.client("s3")
+    client = boto3.client("kms")
 
     def __init__(self, event):
         super().__init__(event)
 
     def extract_event_data(self, event):
         """ Extract required event data """
-        # TODO: Extract any data you need from the triggering event.
-        #
-        # Example:
-        # self.bucket_name = event["detail"]["requestParameters"]["bucketName"]
+        if event["detail"]["eventName"] == "CreateKey":
+            self.key_id = event["detail"]["responseElements"]["keyMetadata"]["keyId"]
+        else:  # event["detail"]["eventName"] == "DisableKeyRotation"
+            self.key_id = event["detail"]["requestParameters"]["keyId"]
 
     def resource_compliant(self):
         """
@@ -30,23 +28,21 @@ class KMSKeyRotationDisabled(AWSRule):
 
         Return True if it is compliant, and False if it is not.
         """
-        # TODO: Implement a check for determining if the resource is compliant
+        response = self.client.get_key_rotation_status(KeyId=self.key_id)
+        return response["KeyRotationEnabled"]
 
     def remediate(self):
         """
         Fix the non-compliant resource so it conforms to the rule
         """
-        # TODO (Optional): Fix the non-compliant resource. This only needs to 
-        # be implemented for rules that remediate non-compliant resources.
-        # Purely detective rules can omit this function.
+        self.client.enable_key_rotation(KeyId=self.key_id)
 
     def get_remediation_message(self):
         """ Returns a message about the remediation action that occurred """
-        # TODO: Provide a human readable message describing what occured. This
-        # message is sent in all notifications.
-        #
-        # Example:
-        # return f"The S3 bucket {self.bucket_name} was unencrypted. AES-256 encryption was enabled."
+        return (
+            f"A KMS key (Key Id: {self.bucket_name}) had key rotation disabled. "
+            f"Rotation has been enabled."
+        )
 
 
 def lambda_handler(event, _):
