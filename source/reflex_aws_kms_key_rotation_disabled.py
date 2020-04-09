@@ -39,10 +39,11 @@ class KMSKeyRotationDisabled(AWSRule):
 
     def get_remediation_message(self):
         """ Returns a message about the remediation action that occurred """
-        return (
-            f"A KMS key (Key Id: {self.key_id}) had key rotation disabled. "
-            f"Rotation has been enabled."
-        )
+        message = f"A KMS key (Key Id: {self.key_id}) had key rotation disabled. "
+        if self.should_remediate():
+            message += "Rotation has been enabled."
+
+        return message
 
 
 def lambda_handler(event, _):
