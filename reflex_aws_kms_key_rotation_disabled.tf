@@ -1,5 +1,5 @@
 module "reflex_aws_kms_key_rotation_disabled" {
-  source           = "git::https://github.com/cloudmitigator/reflex-engine.git//modules/cwe_lambda?ref=v0.5.4"
+  source           = "git::https://github.com/cloudmitigator/reflex-engine.git//modules/cwe_lambda?ref=v0.5.7"
   rule_name        = "KMSKeyRotationDisabled"
   rule_description = "A Reflex Rule for enforcing KMS Key rotation"
 
